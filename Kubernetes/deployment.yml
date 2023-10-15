@@ -1,7 +1,14 @@
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prod
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: netflix-app
+  namespace: prod
   labels:
     app: netflix-app
 spec:
