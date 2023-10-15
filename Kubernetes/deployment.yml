@@ -23,6 +23,6 @@ spec:
     spec:
       containers:
       - name: netflix-app
-        image: fortressit/netflz:1.0
+        image: fortressit/netflz
         ports:
         - containerPort: 80
