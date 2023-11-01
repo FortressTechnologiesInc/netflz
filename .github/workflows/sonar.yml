@@ -30,8 +30,8 @@ jobs:
       run: |
         # Install your certificate to the system trust store
         # Replace <your-cert-file.crt> with the actual certificate file
-        sudo cp 92a37fbd5e21a53a95c716e1144f442f582b94d0fafc673eb6717a4eb51a88a7 /usr/local/share/ca-certificates/
-        sudo update-ca-certificates
+         sudo cp 92a37fbd5e21a53a95c716e1144f442f582b94d0fafc673eb6717a4eb51a88a7 /usr/local/share/ca-certificates/
+         sudo update-ca-certificates
 
     - name: Run SonarQube analysis
       run: |
