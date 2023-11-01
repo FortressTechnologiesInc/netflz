@@ -14,6 +14,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Start SonarQube server
+        run: |
+          docker run -d --name sonarqube \
+            --network=bridge \
+            -p 9000:9000 \
+            -e SONAR_JDBC_USERNAME=admin \
+            -e SONAR_JDBC_PASSWORD=admin123 \
+            -v sonarqube_data:/opt/sonarqube/data \
+            -v sonarqube_extensions:/opt/sonarqube/extensions \
+            -v sonarqube_logs:/opt/sonarqube/logs \
+            sonarqube:lts-community
+        ports:
+          - 9000:9000
+
       - name: Run Sonar Scanner
         run: |
-          docker run --network=host -e SONAR_HOST_URL='http://127.0.0.1:9000' --user="$(id -u):$(id -g)" -v "$PWD:/usr/src" sonarsource/sonar-scanner-cli
+          docker run --network=bridge \
+            -v "$PWD:/usr/src" sonarsource/sonar-scanner-cli \
+            -Dsonar.projectKey=<project key> \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=http://192.168.0.17:9000 \
+            -Dsonar.login=squ_fcd51069e8f0f1e4838f37df32fd564c2cd4a860
