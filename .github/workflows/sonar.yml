@@ -1,3 +1,4 @@
+
 name: SonarQube Analysis
 
 on:
@@ -19,12 +20,12 @@ jobs:
           docker run -d --name sonarqube \
             --network=bridge \
             -p 9000:9000 \
-            -e SONAR_JDBC_USERNAME=admin \
-            -e SONAR_JDBC_PASSWORD=admin123 \
+            -e SONAR_JDBC_USERNAME=<db username> \
+            -e SONAR_JDBC_PASSWORD=<db password> \
             -v sonarqube_data:/opt/sonarqube/data \
             -v sonarqube_extensions:/opt/sonarqube/extensions \
             -v sonarqube_logs:/opt/sonarqube/logs \
-            sonarqube:lts-community
+            sonarqube:community
         ports:
           - 9000:9000
 
@@ -35,4 +36,4 @@ jobs:
             -Dsonar.projectKey=<project key> \
             -Dsonar.sources=. \
             -Dsonar.host.url=http://192.168.0.17:9000 \
-            -Dsonar.login=squ_fcd51069e8f0f1e4838f37df32fd564c2cd4a860
+            -Dsonar.login=<token>
