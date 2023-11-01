@@ -10,22 +10,15 @@ jobs:
     name: Build and Analyze
     runs-on: ubuntu-latest
 
-    services:
-      sonarqube:
-        image: sonarqube:lts-community
-        options: --name sonrqbe -p 9081:9081
-        ports:
-          - 9081:9081
-
     steps:
       - name: Check Out Code
         uses: actions/checkout@v2
 
       - name: Run Sonar Scanner
         run: |
-          docker run -d --name sonrqbe -p 9081:9081 -e GITHUB_ACTIONS=true -e CI=true sonarqube:lts-community
+          docker run -d --name sonrsonr -p 9000:9000 -e GITHUB_ACTIONS=true -e CI=true sonarqube:lts-community
           # Optionally, you can add a sleep command to give SonarQube time to start
           sleep 60  # Adjust this as needed
 
-          # Run your analysis with Sonar Scanner
-          docker run --rm -e SONAR_HOST_URL=http://172.17.0.4:9081 -e SONAR_TOKEN=${{ secrets.SONAR_TOKEN }} -v $GITHUB_WORKSPACE:/usr/src sonarsource/sonar-scanner-cli
+          # Run your analysis with Sonar Scanner, specifying the SonarQube URL
+          docker run --rm -e SONAR_HOST_URL=http://192.168.0.17:9000/ -e SONAR_TOKEN=${{ secrets.SONAR_TOKEN }} -v $GITHUB_WORKSPACE:/usr/src sonarsource/sonar-scanner-cli
