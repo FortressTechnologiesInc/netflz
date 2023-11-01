@@ -1,21 +1,31 @@
-name: Build
+name: SonarQube Analysis
 
 on:
   push:
     branches:
       - main
 
-
 jobs:
   build:
-    name: Build
+    name: Build and Analyze
     runs-on: ubuntu-latest
+
+    services:
+      sonarqube:
+        image: sonarqube:lts-community
+        options: --name sonrqbe -p 9081:9000
+        ports:
+          - 9081:9000
+
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - uses: sonarsource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-     
+      - name: Check Out Code
+        uses: actions/checkout@v2
+
+      - name: Run Sonar Scanner
+        run: |
+          docker run -d --name sonrqbe -p 9081:9000 -e GITHUB_ACTIONS=true -e CI=true sonarqube:lts-community
+          # Optionally, you can add a sleep command to give SonarQube time to start
+          sleep 60  # Adjust this as needed
+
+          # Run your analysis with Sonar Scanner
+          docker run --rm -e SONAR_HOST_URL=http://172.17.0.4:9081 -e SONAR_TOKEN=${{ secrets.SONAR_TOKEN }} -v $GITHUB_WORKSPACE:/usr/src sonarsource/sonar-scanner-cli
