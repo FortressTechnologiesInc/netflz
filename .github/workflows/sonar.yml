@@ -6,19 +6,33 @@ on:
       - main
 
 jobs:
-  build:
-    name: Build and Analyze
+  sonarqube-analysis:
+    name: Run SonarQube Analysis
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check Out Code
+      - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Start SonarQube server
+        run: |
+          docker run -d --name sonarqube \
+            --network=bridge \
+            -p 9000:9000 \
+            -e SONAR_JDBC_USERNAME=<db username> \
+            -e SONAR_JDBC_PASSWORD=<db password> \
+            -v sonarqube_data:/opt/sonarqube/data \
+            -v sonarqube_extensions:/opt/sonarqube/extensions \
+            -v sonarqube_logs:/opt/sonarqube/logs \
+            sonarqube:lts-community
+        ports:
+          - 9000:9000
 
       - name: Run Sonar Scanner
         run: |
-          docker run -d --name sonrsonr -p 9000:9000 -e GITHUB_ACTIONS=true -e CI=true sonarqube:lts-community
-          # Optionally, you can add a sleep command to give SonarQube time to start
-          sleep 60  # Adjust this as needed
-
-          # Run your analysis with Sonar Scanner, specifying the SonarQube URL
-          docker run --rm -e SONAR_HOST_URL=http://192.168.0.17:9000/ -e SONAR_TOKEN=${{ secrets.SONAR_TOKEN }} -v $GITHUB_WORKSPACE:/usr/src sonarsource/sonar-scanner-cli
+          docker run --network=bridge \
+            -v "$PWD:/usr/src" sonarsource/sonar-scanner-cli \
+            -Dsonar.projectKey=<project key> \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=http://192.168.0.17:9000 \
+            -Dsonar.login=squ_fcd51069e8f0f1e4838f37df32fd564c2cd4a860
