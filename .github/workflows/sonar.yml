@@ -1,20 +1,21 @@
-name: SonarQube Analysis
+name: Build
 
 on:
   push:
     branches:
       - main
 
+
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
-
     steps:
-    - name: Access SonarQube
-      run: |
-        # Set the SonarQube server URL and access token
-        SONARQUBE_URL="http://192.168.0.17:9000"
-        SONARQUBE_TOKEN="squ_fcd51069e8f0f1e4838f37df32fd564c2cd4a860"
-
-        # Make an HTTP request to access SonarQube using the access token
-        curl -I -u $SONARQUBE_TOKEN: $SONARQUBE_URL
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      
