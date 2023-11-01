@@ -1,21 +1,10 @@
-name: Build
-
-on:
-  push:
-    branches:
-      - main
-
-
 jobs:
-  build:
-    name: Build
+  my_job:
     runs-on: ubuntu-latest
+    container:
+      image: sonarqube:latest
+      options: --http://192.168.0.17:9100
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - uses: sonarsource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      
+      - name: Check SonarQube
+        run: |
+          # Your commands to access SonarQube here
