@@ -16,7 +16,7 @@ jobs:
 
       - name: Run Sonar Scanner
         run: |
-          docker run -d --name sonarqube -p 9081:9000 -e GITHUB_ACTIONS=true -e CI=true sonarqube:lts-community
+          docker run -d --name sonrsonr -p 9000:9000 -e GITHUB_ACTIONS=true -e CI=true sonarqube:lts-community
           # Optionally, you can add a sleep command to give SonarQube time to start
           sleep 60  # Adjust this as needed
 
