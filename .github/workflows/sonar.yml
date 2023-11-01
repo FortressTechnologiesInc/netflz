@@ -1,21 +1,40 @@
-name: Build
+name: SonarQube Analysis
 
 on:
   push:
     branches:
-      - main
-
+      - main # You can specify the branch you want to trigger this on
 
 jobs:
   build:
-    name: Build
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - uses: sonarsource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Java
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11' # You can change the Java version as needed
+
+    - name: Install certificates
+      run: |
+        # Install your certificate to the system trust store
+        # Replace <your-cert-file.crt> with the actual certificate file
+        sudo cp 92a37fbd5e21a53a95c716e1144f442f582b94d0fafc673eb6717a4eb51a88a7 /usr/local/share/ca-certificates/
+        sudo update-ca-certificates
+
+    - name: Run SonarQube analysis
+      run: |
+        # Use the SonarScanner to analyze your code
+        # Replace <your-sonar-server-ip> with the actual IP address of your Sonar server
+        sonar-scanner \
+          -Dsonar.host.url=http://192.168.0.17:9000 \
+          -Dsonar.login=squ_fcd51069e8f0f1e4838f37df32fd564c2cd4a860 # Replace with your authentication token
+
+    - name: Upload SonarQube analysis results
+      uses: actions/upload-artifact@v2
+      with:
+        name: sonarqube-report
+        path: .scannerwork # Adjust this path as needed
