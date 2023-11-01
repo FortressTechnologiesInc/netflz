@@ -3,7 +3,7 @@ name: SonarQube Analysis
 on:
   push:
     branches:
-      - main # You can specify the branch you want to trigger this on
+      - main
 
 jobs:
   build:
@@ -16,7 +16,15 @@ jobs:
     - name: Set up Java
       uses: actions/setup-java@v2
       with:
-        java-version: '11' # You can change the Java version as needed
+        java-version: '11'
+        distribution: 'adopt'  # Specify the distribution you want, e.g., 'adopt', 'adopt-openj9', 'adopt-hotspot', etc.
+        architecture: 'x64'
+        check-latest: false
+        server-id: github
+        server-username: ${{ github.actor }}
+        server-password: ${{ secrets.GITHUB_TOKEN }}
+        overwrite-settings: true
+        job-status: success
 
     - name: Install certificates
       run: |
@@ -31,10 +39,10 @@ jobs:
         # Replace <your-sonar-server-ip> with the actual IP address of your Sonar server
         sonar-scanner \
           -Dsonar.host.url=http://192.168.0.17:9000 \
-          -Dsonar.login=squ_fcd51069e8f0f1e4838f37df32fd564c2cd4a860 # Replace with your authentication token
+          -Dsonar.login=squ_fcd51069e8f0f1e4838f37df32fd564c2cd4a860
 
     - name: Upload SonarQube analysis results
       uses: actions/upload-artifact@v2
       with:
         name: sonarqube-report
-        path: .scannerwork # Adjust this path as needed
+        path: .scannerwork
