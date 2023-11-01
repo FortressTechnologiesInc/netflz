@@ -12,5 +12,9 @@ jobs:
     steps:
     - name: Access SonarQube
       run: |
-        # Make an HTTP request to access SonarQube
-        curl -I http://192.168.0.17:9000
+        # Set the SonarQube server URL and access token
+        SONARQUBE_URL="http://192.168.0.17:9000"
+        SONARQUBE_TOKEN="squ_fcd51069e8f0f1e4838f37df32fd564c2cd4a860"
+
+        # Make an HTTP request to access SonarQube using the access token
+        curl -I -u $SONARQUBE_TOKEN: $SONARQUBE_URL
