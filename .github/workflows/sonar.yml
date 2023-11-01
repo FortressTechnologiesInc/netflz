@@ -33,7 +33,7 @@ jobs:
         run: |
           docker run --network=bridge \
             -v "$PWD:/usr/src" sonarsource/sonar-scanner-cli \
-            -Dsonar.projectKey=<project key> \
+            -Dsonar.sonar.projectKey=netflz \
             -Dsonar.sources=. \
             -Dsonar.host.url=http://192.168.0.17:9000 \
-            -Dsonar.login=<token>
+            -Dsonar.login=squ_fcd51069e8f0f1e4838f37df32fd564c2cd4a860
