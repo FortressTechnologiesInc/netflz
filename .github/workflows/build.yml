@@ -1,38 +1,21 @@
-name: SonarQube Analysis
+name: Build
 
 on:
   push:
     branches:
       - main
 
+
 jobs:
-  sonarqube-analysis:
-    name: Run SonarQube Analysis
+  build:
+    name: Build
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Start SonarQube server
-        run: |
-          docker run -d --name sonarqube \
-            --network=bridge \
-            -p 9000:9000 \
-            -e SONAR_JDBC_USERNAME=<db username> \
-            -e SONAR_JDBC_PASSWORD=<db password> \
-            -v sonarqube_data:/opt/sonarqube/data \
-            -v sonarqube_extensions:/opt/sonarqube/extensions \
-            -v sonarqube_logs:/opt/sonarqube/logs \
-            sonarqube:community
-        ports:
-          - 9000:9000
-
-      - name: Run Sonar Scanner
-        run: |
-          docker run --network=bridge \
-            -v "$PWD:/usr/src" sonarsource/sonar-scanner-cli \
-            -Dsonar.projectKey=<project key> \
-            -Dsonar.sources=. \
-            -Dsonar.host.url=http://192.168.0.17:9000 \
-            -Dsonar.login=<token>
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+     
