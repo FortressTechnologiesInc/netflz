@@ -1,5 +1,4 @@
-
-name: SonarQube Analysis
+name: SonarQube Scan
 
 on:
   push:
@@ -7,33 +6,22 @@ on:
       - main
 
 jobs:
-  sonarqube-analysis:
-    name: Run SonarQube Analysis
+  sonarqube:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Start SonarQube server
-        run: |
-          docker run -d --name sonarqube \
-            --network=bridge \
-            -p 9000:9000 \
-            -e SONAR_JDBC_USERNAME= \
-            -e SONAR_JDBC_PASSWORD= \
-            -v sonarqube_data:/opt/sonarqube/data \
-            -v sonarqube_extensions:/opt/sonarqube/extensions \
-            -v sonarqube_logs:/opt/sonarqube/logs \
-            sonarqube:lts-community
-        ports:
-          - 9000:9000
+    - name: Set up Java
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
 
-      - name: Run Sonar Scanner
-        run: |
-          docker run --network=bridge \
-            -v "$PWD:/usr/src" sonarsource/sonar-scanner-cli \
-            -Dsonar.sonar.projectKey=netflz \
-            -Dsonar.sources=. \
-            -Dsonar.host.url=http://192.168.0.17:9000 \
-            -Dsonar.login=squ_fcd51069e8f0f1e4838f37df32fd564c2cd4a860
+    - name: SonarQube Scan
+      run: |
+        sonar-scanner \
+          -Dsonar.projectKey=netflz \
+          -Dsonar.sources=. \
+          -Dsonar.host.url=http://192.168.0.17:9000 \
+          -Dsonar.login=squ_fcd51069e8f0f1e4838f37df32fd564c2cd4a860
