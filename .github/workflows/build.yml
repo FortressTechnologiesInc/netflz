@@ -6,8 +6,8 @@ on:
       - main
 
 jobs:
-  build_and_scan:
-    name: Build and Scan
+  build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -15,36 +15,22 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
-      - name: Build and Package
-        run: |
-          # Add your build commands here
-          # Example:
-          # mvn clean package
-
-      - name: Trivy Scan
-        run: |
-          # Install Trivy
-          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy-archive-keyring.gpg
-          echo 'deb [signed-by=/usr/share/keyrings/trivy-archive-keyring.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main' | sudo tee /etc/apt/sources.list.d/trivy.list > /dev/null
-          sudo apt-get update
-          sudo apt-get install -y trivy
-
-          # Scan Docker images with Trivy
-          trivy image -f json -o trivy-report.json <your-docker-image>
-
-      - name: OWASP Dependency-Check Scan
-        run: |
-          # Install OWASP Dependency-Check
-          wget -q -O - https://owasp.org/www-project-dependency-check/DependencyCheck-Release/signature.txt | gpg --verify
-          wget https://dl.bintray.com/jeremy-long/owasp/dependency-check-7.0.2-release.zip
-          unzip dependency-check-7.0.2-release.zip
-
-          # Run Dependency-Check
-          cd dependency-check/bin
-          sh dependency-check.sh -f JSON -o dependency-check-report.json -s <path-to-your-source-code>
-
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy-archive-keyring.gpg
+          echo 'deb [signed-by=/usr/share/keyrings/trivy-archive-keyring.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -cs) main' | sudo tee /etc/apt/sources.list.d/trivy.list > /dev/null
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: Trivy Scan
+        run: |
+          trivy image -f json -o trivy-report.json netflz
+        shell: /usr/bin/bash -e {0}
