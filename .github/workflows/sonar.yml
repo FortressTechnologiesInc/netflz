@@ -1,4 +1,4 @@
-name: SonarQube Scan
+name: Build and Scan
 
 on:
   push:
@@ -6,23 +6,45 @@ on:
       - main
 
 jobs:
-  sonarqube-scan:
+  build_and_scan:
+    name: Build and Scan
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
-    - name: Docker Login
-      run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-      env:
-        DOCKER_USERNAME: <YOUR_REGISTRY_USERNAME>
-        DOCKER_PASSWORD: <YOUR_REGISTRY_PASSWORD>
+      - name: Build and Package
+        run: |
+          # Add your build commands here
+          # Example:
+          # mvn clean package
 
-    - name: SonarQube Scan
-      run: |
-        /usr/bin/docker run --name sonarqube_scan --rm \
-          -e SONAR_TOKEN=<YOUR_SONAR_TOKEN> \
-          -e SONAR_HOST_URL=<YOUR_SONAR_HOST_URL> \
-          -v "$(pwd):/usr/src" \
-          sonarsource/sonarqube-scan-action
+      - name: Trivy Scan
+        run: |
+          # Install Trivy
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy-archive-keyring.gpg
+          echo 'deb [signed-by=/usr/share/keyrings/trivy-archive-keyring.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main' | sudo tee /etc/apt/sources.list.d/trivy.list > /dev/null
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+          # Scan Docker images with Trivy
+          trivy image -f json -o trivy-report.json <your-docker-image>
+
+      - name: OWASP Dependency-Check Scan
+        run: |
+          # Install OWASP Dependency-Check
+          wget -q -O - https://owasp.org/www-project-dependency-check/DependencyCheck-Release/signature.txt | gpg --verify
+          wget https://dl.bintray.com/jeremy-long/owasp/dependency-check-7.0.2-release.zip
+          unzip dependency-check-7.0.2-release.zip
+
+          # Run Dependency-Check
+          cd dependency-check/bin
+          sh dependency-check.sh -f JSON -o dependency-check-report.json -s <path-to-your-source-code>
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
